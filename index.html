@@ -8,35 +8,44 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                500: '#0ea5e9',
+                600: '#0284c7',
+                700: '#0369a1',
+                900: '#0c4a6e',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'Cairo', 'sans-serif'],
+            }
+          },
+        },
+      }
+    </script>
     
-    <!-- Simple inline styles as fallback -->
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Simpler import map without complex CDNs -->
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@19.2.0",
+          "react-dom/client": "https://esm.sh/react-dom@19.2.0/client"
+        }
+      }
+    </script>
+    
     <style>
-      body {
-        font-family: 'Inter', 'Cairo', sans-serif;
-        background-color: #f8fafc;
-        color: #0f172a;
-        margin: 0;
-        padding: 0;
-      }
-      
-      .dark body {
-        background-color: #020617;
-        color: #f1f5f9;
-      }
-      
-      #root {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-      }
-      
-      .loading {
-        text-align: center;
-        padding: 40px;
-      }
-      
+      /* Loading animation */
       .spinner {
         border: 4px solid rgba(0, 0, 0, 0.1);
         width: 36px;
@@ -51,42 +60,94 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
+      
+      /* Hide React app until loaded */
+      #react-app {
+        display: none;
+      }
+      
+      #react-app.loaded {
+        display: block;
+      }
     </style>
   </head>
   <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-    <div id="root">
-      <!-- Loading fallback -->
-      <div class="loading">
-        <div class="spinner"></div>
-        <h1 class="text-xl font-bold mb-2">Lasa Technology</h1>
-        <p class="text-slate-600 dark:text-slate-400">Loading application...</p>
-        <p class="text-sm text-slate-500 dark:text-slate-500 mt-4">
-          If this message persists, check the browser console for errors.
-        </p>
+    <!-- Loading screen -->
+    <div id="loading">
+      <div class="min-h-screen flex items-center justify-center">
+        <div class="text-center">
+          <div class="spinner"></div>
+          <h1 class="text-2xl font-bold mt-4 mb-2">Lasa Technology</h1>
+          <p class="text-slate-600 dark:text-slate-400">Loading application...</p>
+        </div>
       </div>
     </div>
     
-    <!-- Add fallback for React if module fails -->
-    <script>
-      // Error handler
-      window.addEventListener('error', function(e) {
-        console.error('Global error:', e.error);
-        document.getElementById('root').innerHTML = `
-          <div class="p-8 max-w-md mx-auto text-center">
-            <h2 class="text-2xl font-bold text-red-600 mb-4">Application Error</h2>
-            <p class="mb-4">There was an error loading the application.</p>
-            <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded text-left">
-              <code class="text-sm">${e.error ? e.error.toString() : 'Unknown error'}</code>
+    <!-- React app container -->
+    <div id="root"></div>
+    
+    <!-- Load React app -->
+    <script type="module">
+      try {
+        console.log('Loading React app...');
+        
+        // Import React
+        import React from 'react';
+        import { createRoot } from 'react-dom/client';
+        
+        console.log('React loaded successfully');
+        
+        // Simple App component
+        function App() {
+          return React.createElement('div', { 
+            className: 'min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-slate-900 dark:to-slate-950 flex items-center justify-center'
+          },
+            React.createElement('div', { className: 'text-center' },
+              React.createElement('h1', { 
+                className: 'text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent'
+              }, 'Lasa Technology'),
+              React.createElement('p', { 
+                className: 'text-lg md:text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto'
+              }, 'Welcome to Lasa Technology - Innovating the future'),
+              React.createElement('button', { 
+                className: 'px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-full hover:opacity-90 transition-opacity'
+              }, 'Get Started')
+            )
+          );
+        }
+        
+        // Render the app
+        const container = document.getElementById('root');
+        if (container) {
+          const root = createRoot(container);
+          root.render(React.createElement(App));
+          
+          // Hide loading screen
+          document.getElementById('loading').style.display = 'none';
+          console.log('App rendered successfully');
+        } else {
+          console.error('Root element not found');
+        }
+      } catch (error) {
+        console.error('Failed to load React app:', error);
+        
+        // Show error message
+        document.getElementById('loading').innerHTML = `
+          <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="text-center max-w-md">
+              <h2 class="text-2xl font-bold text-red-600 mb-4">Loading Error</h2>
+              <p class="mb-4">Failed to load the application. Please check:</p>
+              <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded text-left mb-4">
+                <code class="text-sm">${error.toString()}</code>
+              </div>
+              <button onclick="window.location.reload()" 
+                class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                Reload Page
+              </button>
             </div>
-            <button onclick="window.location.reload()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-              Reload Page
-            </button>
           </div>
         `;
-      });
+      }
     </script>
-    
-    <!-- Your React app -->
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
